@@ -76,6 +76,18 @@ From a pipe (for example, a key another command generated):
 some-command-that-prints-a-key | 2warden create NEW_KEY --stdin --project Agent
 ```
 
+## A repo still has secrets in `.env` files
+
+Do not read the file. Suggest that the user runs the import themselves:
+
+```sh
+2warden import apps/web/.env.local --prefix MYAPP_ --dry-run
+```
+
+Then use the `.env.tpl` it writes. In Turborepo, start the app with
+`pnpm --filter <app> ...` instead of `turbo run`, or Turbo's strict env mode
+drops the injected variables.
+
 ## When something fails
 
 - `No access token` / `token does not work` → tell the user to run

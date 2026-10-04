@@ -16,8 +16,8 @@ chmodSync(FAKE, 0o755);
 
 const OPENAI_ID = '11111111-1111-4111-8111-111111111111';
 const STRIPE_ID = '22222222-2222-4222-8222-222222222222';
-const OPENAI_VAL = 'sk-openai-SECRET-value-123';
-const STRIPE_VAL = 'sk_live_STRIPE_secret_456';
+const OPENAI_VAL = 'fake-openai-secret-123';
+const STRIPE_VAL = 'fake-stripe-secret-456';
 const PROJECT = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', name: 'Agent' };
 
 let home, db, arglog;

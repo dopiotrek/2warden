@@ -2,23 +2,47 @@
   "name": "2warden",
   "version": "0.1.0",
   "description": "Bitwarden Secrets Manager for coding agents. The agent finds, uses and saves secrets by reference and never sees the values.",
+  "keywords": [
+    "bitwarden",
+    "secrets-manager",
+    "bws",
+    "secrets",
+    "ai-agents",
+    "claude-code",
+    "dotenv",
+    "cli"
+  ],
+  "homepage": "https://github.com/dopiotrek/2warden#readme",
+  "bugs": {
+    "url": "https://github.com/dopiotrek/2warden/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dopiotrek/2warden.git"
+  },
   "license": "MIT",
+  "author": "Piotrek (https://github.com/dopiotrek)",
   "type": "module",
   "bin": {
     "2warden": "dist/cli.js"
   },
   "files": [
     "dist",
-    "skill"
+    "skill",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
   ],
   "engines": {
     "node": ">=22"
   },
+  "packageManager": "pnpm@10.34.6",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm build && node --test test/*.test.mjs",
-    "verify": "pnpm check && pnpm test"
+    "verify": "pnpm check && pnpm test",
+    "prepack": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

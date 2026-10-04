@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { Bws } from './bws.js';
 import { readClipboard, writeClipboard } from './clipboard.js';
@@ -10,6 +11,8 @@ import { parseRef, resolveRefs, toRef } from './refs.js';
 import { runChild } from './run.js';
 import { clearToken, readToken, requireToken, writeToken } from './token.js';
 import { exec, promptHidden, readStdin, trimOneNewline, UserError } from './util.js';
+
+const VERSION = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
 
 const HELP = `2warden — Bitwarden Secrets Manager for coding agents.
 The agent works with references (bws://<id>). It never needs the values.
@@ -375,8 +378,9 @@ async function main(argv: string[]): Promise<number> {
 		case 'help':
 			process.stdout.write(HELP);
 			return 0;
+		case '-v':
 		case '--version':
-			console.log('0.1.0');
+			console.log(VERSION);
 			return 0;
 		case 'find':
 			await cmdFind(rest);

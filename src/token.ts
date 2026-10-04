@@ -57,7 +57,7 @@ export async function writeToken(token: string): Promise<TokenSource> {
 		if (!t.startsWith('0.')) hints.push('does not start with "0."');
 		throw new UserError(
 			`That does not look like a Bitwarden access token (${hints.join(', ')}).\n` +
-				'Did the clipboard still hold something else? Copy the token again, or run 2warden token set with no flag and paste it at the prompt'
+				'Copy the whole token from Bitwarden (it starts with "0."), then run 2warden token set again.'
 		);
 	}
 	if (useKeychain()) {

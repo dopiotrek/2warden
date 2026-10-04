@@ -84,10 +84,9 @@ export async function importEnv(bws: Bws, o: ImportOptions, log: (s: string) => 
 			if (back.value !== value) throw new UserError(`${r.key}: read back did not match.`);
 			r.status = 'created';
 			r.ref = toRef(created.id);
-			log(`created  ${r.key}`);
 		} catch (e) {
 			r.status = 'failed';
-			log(`FAILED   ${r.key}: ${(e as Error).message}`);
+			log(`${r.key} failed: ${(e as Error).message}`);
 			break;
 		}
 	}
