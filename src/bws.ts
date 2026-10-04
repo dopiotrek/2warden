@@ -48,8 +48,20 @@ export class Bws {
 		}
 		const what = `bws ${args.slice(0, 2).join(' ')}`; // never include later args: they may hold a value
 		if (r.code !== 0) {
-			const msg = scrub(r.stderr.trim() || r.stdout.trim(), [this.token, ...secrets]);
-			throw new UserError(`${what} failed: ${msg || `exit code ${r.code}`}`);
+			const raw = scrub(r.stderr.trim() || r.stdout.trim(), [this.token, ...secrets]);
+			// Keep bws's own message; drop its Rust "Location / Backtrace" noise.
+			const msg = raw
+				.split('\n')
+				.filter((l) => !/^\s*(Location:|crates\/|Backtrace omitted|Run with RUST_BACKTRACE)/.test(l))
+				.join('\n')
+				.trim();
+			let hint = '';
+			if (msg.includes('invalid_client')) {
+				hint = '\nHint: the server does not know this token. EU account? Run: 2warden config set server https://vault.bitwarden.eu';
+			} else if (msg.includes('404') && args[1] === 'create') {
+				hint = '\nHint: the machine account probably has only "Can read" on this project. In Secrets Manager, open the machine account, Projects tab, and set "Can read, write".';
+			}
+			throw new UserError(`${what} failed: ${msg || `exit code ${r.code}`}${hint}`);
 		}
 		try {
 			return JSON.parse(r.stdout);
