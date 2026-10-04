@@ -1,0 +1,27 @@
+{
+  "name": "2warden",
+  "version": "0.1.0",
+  "description": "Bitwarden Secrets Manager for coding agents. The agent finds, uses and saves secrets by reference and never sees the values.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "2warden": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "skill"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm build && node --test test/*.test.mjs",
+    "verify": "pnpm check && pnpm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
