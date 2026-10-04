@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { Bws } from './bws.js';
 import { readClipboard, writeClipboard } from './clipboard.js';
 import { loadConfig, saveConfig, type Config } from './config.js';
 import { parseEnvFlag, parseEnvTemplate } from './envfile.js';
+import { importEnv } from './import.js';
 import { parseRef, resolveRefs, toRef } from './refs.js';
 import { runChild } from './run.js';
 import { clearToken, readToken, requireToken, writeToken } from './token.js';
@@ -25,6 +27,10 @@ Save
   2warden create <KEY> (--clipboard | --stdin) [--project P] [--note TEXT] [--allow-duplicate]
                                                    Save a new secret. The value comes from the clipboard
                                                    or a pipe, never from an argument. Read back and checked.
+  2warden import <envfile> --prefix APP_ [--only A,B] [--project P] [--out F] [--dry-run] [--force]
+                                                   Copy secret keys from a .env file into Bitwarden as
+                                                   APP_<NAME>, and write a template of references
+                                                   (default: .env.tpl next to the file).
 
 Reveal (avoid in agent sessions)
   2warden read <bws://id> [--clipboard]            Print one value, or copy it to the clipboard.
@@ -241,6 +247,49 @@ async function cmdCreate(argv: string[]): Promise<void> {
 	console.error(`Saved ${key} in ${project.name}. Read back and checked.`);
 }
 
+async function cmdImport(argv: string[]): Promise<number> {
+	const a = parseArgs(argv, ['project', 'prefix', 'only', 'out'], ['dry-run', 'force']);
+	const file = a.pos[0];
+	if (!file || a.pos.length !== 1) throw new UserError('Usage: 2warden import <envfile> --prefix APP_ [--only A,B] [--dry-run]', 2);
+	const prefix = one(a, 'prefix');
+	if (prefix === undefined) {
+		throw new UserError('Give --prefix, e.g. --prefix DRONELIST_. It keeps keys from different apps apart.', 2);
+	}
+	if (prefix && !/^[A-Za-z0-9_]+$/.test(prefix)) throw new UserError('--prefix may use letters, digits and _ only.', 2);
+	const cfg = await loadConfig();
+	const projectArg = one(a, 'project') ?? cfg.project;
+	if (!projectArg) throw new UserError('No project. Pass --project, or set one: 2warden config set project <name>', 2);
+	const bws = await client(cfg);
+	const project = await bws.resolveProject(projectArg);
+	const out = one(a, 'out') ?? join(dirname(file), '.env.tpl');
+	const only = one(a, 'only')
+		?.split(',')
+		.map((s) => s.trim())
+		.filter(Boolean);
+	const dryRun = has(a, 'dry-run');
+
+	const rows = await importEnv(bws, { file, project, prefix, only, out, dryRun, force: has(a, 'force') }, (l) =>
+		console.error(l)
+	);
+
+	const label: Record<string, string> = {
+		new: 'will create',
+		exists: 'exists, same value',
+		'exists-differs': 'EXISTS, VALUE DIFFERS (kept as is)',
+		created: 'created',
+		failed: 'FAILED'
+	};
+	const w = Math.max(...rows.map((r) => r.key.length));
+	console.log(`${dryRun ? 'Dry run. ' : ''}Project: ${project.name}`);
+	for (const r of rows) console.log(`  ${r.key.padEnd(w)}  ${label[r.status]}`);
+	if (dryRun) {
+		console.log('Nothing was saved. Run again without --dry-run to import.');
+		return 0;
+	}
+	console.log(`Wrote ${out}`);
+	return rows.some((r) => r.status === 'failed') ? 1 : 0;
+}
+
 async function cmdToken(argv: string[]): Promise<void> {
 	const [sub, ...restArgv] = argv;
 	if (sub === 'set') {
@@ -345,6 +394,8 @@ async function main(argv: string[]): Promise<number> {
 		case 'create':
 			await cmdCreate(rest);
 			return 0;
+		case 'import':
+			return cmdImport(rest);
 		case 'token':
 			await cmdToken(rest);
 			return 0;

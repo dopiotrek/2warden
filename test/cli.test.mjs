@@ -251,3 +251,71 @@ test('env template parser handles quotes, export and comments', () => {
 		]
 	);
 });
+
+// ---- import
+
+function writeEnv(text) {
+	const dir = mkdtempSync(join(home, 'app-'));
+	const f = join(dir, '.env.local');
+	writeFileSync(f, text);
+	return { dir, f };
+}
+
+const ENV_TEXT = [
+	'PUBLIC_SUPABASE_ANON_KEY=public-anon-value',
+	'STRIPE_SECRET_KEY="sk_test_import_value_1"',
+	'DATABASE_URL=postgres://u:pw-import-value@db/x',
+	'VERCEL_OIDC_TOKEN=vercel-token-value',
+	'PORT=3000',
+	'EMPTY_SECRET=',
+	'STRIPE_SECRET_KEY=sk_test_import_value_2',
+	''
+].join('\n');
+
+test('import --dry-run lists secret keys only and saves nothing', () => {
+	const { f, dir } = writeEnv(ENV_TEXT);
+	const r = cli(['import', f, '--prefix', 'APP_', '--project', 'Agent', '--dry-run']);
+	assert.equal(r.code, 0, r.err);
+	assert.match(r.out, /APP_STRIPE_SECRET_KEY\s+will create/);
+	assert.match(r.out, /APP_DATABASE_URL\s+will create/);
+	assert.doesNotMatch(r.out, /PUBLIC_SUPABASE|VERCEL|PORT|EMPTY/);
+	assert.ok(!r.all.includes('import_value') && !r.all.includes('pw-import'));
+	assert.equal(JSON.parse(readFileSync(db, 'utf8')).secrets.length, 2);
+	assert.throws(() => readFileSync(join(dir, '.env.tpl')));
+});
+
+test('import saves values (last line wins), writes a template, and is safe to run twice', () => {
+	const { f, dir } = writeEnv(ENV_TEXT);
+	const r = cli(['import', f, '--prefix', 'APP_', '--project', 'Agent']);
+	assert.equal(r.code, 0, r.err);
+	assert.ok(!r.all.includes('import_value') && !r.all.includes('pw-import'), r.all);
+	const secrets = JSON.parse(readFileSync(db, 'utf8')).secrets;
+	assert.equal(secrets.find((s) => s.key === 'APP_STRIPE_SECRET_KEY').value, 'sk_test_import_value_2');
+	assert.equal(secrets.find((s) => s.key === 'APP_DATABASE_URL').value, 'postgres://u:pw-import-value@db/x');
+	const tpl = readFileSync(join(dir, '.env.tpl'), 'utf8');
+	assert.match(tpl, /^STRIPE_SECRET_KEY=bws:\/\/[0-9a-f-]{36}$/m);
+	assert.match(tpl, /^DATABASE_URL=bws:\/\/[0-9a-f-]{36}$/m);
+	assert.ok(!tpl.includes('import_value'));
+
+	// Template refuses to be overwritten without --force.
+	const again = cli(['import', f, '--prefix', 'APP_', '--project', 'Agent']);
+	assert.equal(again.code, 1);
+	assert.match(again.err, /already exists/);
+
+	// With --force, nothing new is created: both keys exist with the same value.
+	const forced = cli(['import', f, '--prefix', 'APP_', '--project', 'Agent', '--force']);
+	assert.equal(forced.code, 0, forced.err);
+	assert.match(forced.out, /APP_STRIPE_SECRET_KEY\s+exists, same value/);
+	assert.equal(JSON.parse(readFileSync(db, 'utf8')).secrets.length, 4);
+
+	// The template works with env run.
+	const run = cli(['env', 'run', join(dir, '.env.tpl'), '--', process.execPath, '-e', 'console.log(process.env.STRIPE_SECRET_KEY.length)']);
+	assert.equal(run.out.trim(), String('sk_test_import_value_2'.length));
+});
+
+test('import requires --prefix', () => {
+	const { f } = writeEnv(ENV_TEXT);
+	const r = cli(['import', f, '--project', 'Agent']);
+	assert.equal(r.code, 2);
+	assert.match(r.err, /--prefix/);
+});
