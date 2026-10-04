@@ -50,7 +50,16 @@ export async function requireToken(): Promise<string> {
 
 export async function writeToken(token: string): Promise<TokenSource> {
 	const t = token.trim();
-	if (!TOKEN_RE.test(t)) throw new UserError('That does not look like a Bitwarden access token.');
+	if (!TOKEN_RE.test(t)) {
+		// Describe the input without showing it.
+		const hints: string[] = [`${t.length} characters`];
+		if (/\s/.test(t)) hints.push('contains spaces or line breaks');
+		if (!t.startsWith('0.')) hints.push('does not start with "0."');
+		throw new UserError(
+			`That does not look like a Bitwarden access token (${hints.join(', ')}).\n` +
+				'Did the clipboard still hold something else? Copy the token again, then run only: 2warden token set --clipboard'
+		);
+	}
 	if (useKeychain()) {
 		// `security -i` reads the command from stdin, so the token never appears in argv.
 		const r = await exec('security', ['-i'], {
