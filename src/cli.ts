@@ -7,7 +7,7 @@ import { parseEnvFlag, parseEnvTemplate } from './envfile.js';
 import { parseRef, resolveRefs, toRef } from './refs.js';
 import { runChild } from './run.js';
 import { clearToken, readToken, requireToken, writeToken } from './token.js';
-import { exec, readStdin, trimOneNewline, UserError } from './util.js';
+import { exec, promptHidden, readStdin, trimOneNewline, UserError } from './util.js';
 
 const HELP = `2warden — Bitwarden Secrets Manager for coding agents.
 The agent works with references (bws://<id>). It never needs the values.
@@ -30,7 +30,8 @@ Reveal (avoid in agent sessions)
   2warden read <bws://id> [--clipboard]            Print one value, or copy it to the clipboard.
 
 Setup
-  2warden token set (--clipboard | --stdin)        Store the machine-account access token.
+  2warden token set [--clipboard | --stdin]       Store the machine-account access token.
+                                                   With no flag it asks, input hidden.
   2warden token status | token clear
   2warden config set project <name-or-id>          Default project for create.
   2warden config set server <url>                  e.g. https://vault.bitwarden.eu
@@ -244,7 +245,12 @@ async function cmdToken(argv: string[]): Promise<void> {
 	const [sub, ...restArgv] = argv;
 	if (sub === 'set') {
 		const a = parseArgs(restArgv, [], ['clipboard', 'stdin']);
-		const where = await writeToken(await readNewValue(a));
+		// No flag: ask on the terminal, input hidden. Safest for a human.
+		const token =
+			!has(a, 'clipboard') && !has(a, 'stdin')
+				? await promptHidden('Paste the access token (input is hidden), then press Enter: ')
+				: await readNewValue(a);
+		const where = await writeToken(token);
 		console.log(`Token saved (${where}).`);
 		if (has(a, 'clipboard')) console.log('Tip: copy something else now, so the token does not stay in the clipboard.');
 		return;
@@ -260,7 +266,7 @@ async function cmdToken(argv: string[]): Promise<void> {
 		console.log('Token removed.');
 		return;
 	}
-	throw new UserError('Usage: 2warden token set (--clipboard | --stdin) | token status | token clear', 2);
+	throw new UserError('Usage: 2warden token set [--clipboard | --stdin] | token status | token clear', 2);
 }
 
 async function cmdConfig(argv: string[]): Promise<void> {
@@ -294,7 +300,7 @@ async function cmdDoctor(): Promise<number> {
 		line(false, 'bws is not installed (download from https://github.com/bitwarden/sdk-sm/releases)');
 	}
 	const t = await readToken();
-	line(!!t, t ? `access token found (${t.source})` : 'no access token (2warden token set --clipboard)');
+	line(!!t, t ? `access token found (${t.source})` : 'no access token (run: 2warden token set)');
 	if (t?.source === 'env') console.log('      note: env token is visible to everything the agent runs');
 	const cfg = await loadConfig();
 	if (t) {

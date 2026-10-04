@@ -42,7 +42,7 @@ export async function requireToken(): Promise<string> {
 	if (!t) {
 		throw new UserError(
 			'No access token. Create a machine account in Bitwarden Secrets Manager, copy its access token, then run:\n' +
-				'  2warden token set --clipboard'
+				'  2warden token set'
 		);
 	}
 	return t.token;
@@ -57,7 +57,7 @@ export async function writeToken(token: string): Promise<TokenSource> {
 		if (!t.startsWith('0.')) hints.push('does not start with "0."');
 		throw new UserError(
 			`That does not look like a Bitwarden access token (${hints.join(', ')}).\n` +
-				'Did the clipboard still hold something else? Copy the token again, then run only: 2warden token set --clipboard'
+				'Did the clipboard still hold something else? Copy the token again, or run 2warden token set with no flag and paste it at the prompt'
 		);
 	}
 	if (useKeychain()) {

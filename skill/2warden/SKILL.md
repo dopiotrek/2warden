@@ -79,6 +79,6 @@ some-command-that-prints-a-key | 2warden create NEW_KEY --stdin --project Agent
 ## When something fails
 
 - `No access token` / `token does not work` → tell the user to run
-  `2warden token set --clipboard` themselves. Do not handle the token.
+  `2warden token set` themselves. Do not handle the token.
 - `bws is not installed` → tell the user to install it (see the 2warden README). Do not install it yourself.
 - Run `2warden doctor` and show the user its output.

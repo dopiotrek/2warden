@@ -51,10 +51,10 @@ the limit is set by Bitwarden, not by the agent behaving well.
    cd ~/repos/apps/2warden && pnpm install && pnpm build && pnpm link --global
    ```
 
-4. Store the token (from the clipboard, so it never sits in shell history) and set defaults:
+4. Store the token (it is asked for with hidden input, so it never sits in shell history) and set defaults:
 
    ```sh
-   2warden token set --clipboard
+   2warden token set                # asks for the token, input hidden
    2warden config set project Agent
    2warden config set server https://vault.bitwarden.eu   # EU accounts only
    2warden doctor

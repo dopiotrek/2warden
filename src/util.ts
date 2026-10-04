@@ -62,3 +62,33 @@ export async function readStdin(): Promise<string> {
 export function trimOneNewline(s: string): string {
 	return s.replace(/\r?\n$/, '');
 }
+
+/** Ask for a value on the terminal without echoing it. Only works with a real TTY. */
+export function promptHidden(question: string): Promise<string> {
+	const stdin = process.stdin;
+	if (!stdin.isTTY) throw new UserError('No terminal to ask on. Use --clipboard or --stdin.', 2);
+	process.stderr.write(question);
+	return new Promise((resolve, reject) => {
+		let value = '';
+		stdin.setRawMode(true);
+		stdin.resume();
+		stdin.setEncoding('utf8');
+		const done = (err?: Error) => {
+			stdin.setRawMode(false);
+			stdin.pause();
+			stdin.off('data', onData);
+			process.stderr.write('\n');
+			if (err) reject(err);
+			else resolve(value);
+		};
+		const onData = (chunk: string) => {
+			for (const ch of chunk) {
+				if (ch === '\r' || ch === '\n') return done();
+				if (ch === '\u0003') return done(new UserError('Cancelled.', 130));
+				if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
+				else if (ch >= ' ') value += ch;
+			}
+		};
+		stdin.on('data', onData);
+	});
+}
