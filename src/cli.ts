@@ -291,7 +291,7 @@ async function cmdDoctor(): Promise<number> {
 		const r = await exec(process.env.TWOWARDEN_BWS_BIN ?? 'bws', ['--version']);
 		line(r.code === 0, `bws installed: ${r.stdout.trim()}`);
 	} catch {
-		line(false, 'bws is not installed (brew install bitwarden/tap/bws)');
+		line(false, 'bws is not installed (download from https://github.com/bitwarden/sdk-sm/releases)');
 	}
 	const t = await readToken();
 	line(!!t, t ? `access token found (${t.source})` : 'no access token (2warden token set --clipboard)');

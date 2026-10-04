@@ -41,7 +41,7 @@ export class Bws {
 			if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
 				throw new UserError(
 					'The Bitwarden Secrets Manager CLI (bws) is not installed.\n' +
-						'  macOS: brew install bitwarden/tap/bws   (or see https://bitwarden.com/help/secrets-manager-cli/)'
+						'  Download it from https://github.com/bitwarden/sdk-sm/releases (there is no Homebrew formula).'
 				);
 			}
 			throw e;

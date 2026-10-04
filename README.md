@@ -32,9 +32,23 @@ the limit is set by Bitwarden, not by the agent behaving well.
    and create an **access token**. Copy it.
 3. Install the tools:
 
+   `bws` has no Homebrew formula. Get it from the
+   [GitHub releases](https://github.com/bitwarden/sdk-sm/releases)
+   (Apple silicon shown; check the latest version there):
+
    ```sh
-   brew install bitwarden/tap/bws
-   cd 2warden && pnpm install && pnpm build && pnpm link --global
+   V=2.1.0
+   cd /tmp
+   curl -fLO https://github.com/bitwarden/sdk-sm/releases/download/bws-v$V/bws-aarch64-apple-darwin-$V.zip
+   curl -fLO https://github.com/bitwarden/sdk-sm/releases/download/bws-v$V/bws-sha256-checksums-$V.txt
+   grep aarch64-apple-darwin bws-sha256-checksums-$V.txt | shasum -a 256 -c -
+   unzip -o bws-aarch64-apple-darwin-$V.zip bws && mv bws /opt/homebrew/bin/ && bws --version
+   ```
+
+   Then 2warden itself:
+
+   ```sh
+   cd ~/repos/apps/2warden && pnpm install && pnpm build && pnpm link --global
    ```
 
 4. Store the token (from the clipboard, so it never sits in shell history) and set defaults:
