@@ -1,0 +1,69 @@
+{
+	"claudeMdExcludes": [
+		"/Users/piotrek/.claude/rules/svelte5.md",
+		"/Users/piotrek/.claude/rules/forms.md",
+		"/Users/piotrek/.claude/rules/tailwind.md",
+		"/Users/piotrek/.claude/rules/motion.md",
+		"/Users/piotrek/.claude/rules/ux-accessibility.md",
+		"/Users/piotrek/.claude/rules/ux-content.md",
+		"/Users/piotrek/.claude/rules/drizzle-supabase.md",
+		"/Users/piotrek/.claude/rules/comments.md",
+		"/Users/piotrek/.claude/rules/docs-conventions.md",
+		"/Users/piotrek/.claude/rules/factory-workflow.md",
+		"/Users/piotrek/.claude/rules/ambition.md",
+		"/Users/piotrek/repos/dotclaude/rules/svelte5.md",
+		"/Users/piotrek/repos/dotclaude/rules/forms.md",
+		"/Users/piotrek/repos/dotclaude/rules/tailwind.md",
+		"/Users/piotrek/repos/dotclaude/rules/motion.md",
+		"/Users/piotrek/repos/dotclaude/rules/ux-accessibility.md",
+		"/Users/piotrek/repos/dotclaude/rules/ux-content.md",
+		"/Users/piotrek/repos/dotclaude/rules/drizzle-supabase.md",
+		"/Users/piotrek/repos/dotclaude/rules/comments.md",
+		"/Users/piotrek/repos/dotclaude/rules/docs-conventions.md",
+		"/Users/piotrek/repos/dotclaude/rules/factory-workflow.md",
+		"/Users/piotrek/repos/dotclaude/rules/ambition.md"
+	],
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Write|Edit|MultiEdit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "[ -e \"$HOME/.claude/hooks/no-secrets.py\" ] || python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/no-secrets.py\""
+					},
+					{
+						"type": "command",
+						"command": "[ -e \"$HOME/.claude/hooks/protect-files.sh\" ] || bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/protect-files.sh\""
+					},
+					{
+						"type": "command",
+						"command": "[ -e \"$HOME/.claude/hooks/drizzle-migration-guard.py\" ] || python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/drizzle-migration-guard.py\""
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "[ -e \"$HOME/.claude/hooks/stop-verify-and-log.py\" ] || python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/stop-verify-and-log.py\"",
+						"asyncRewake": true
+					}
+				]
+			}
+		],
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/remote-setup.sh\"",
+						"timeout": 600
+					}
+				]
+			}
+		]
+	}
+}
