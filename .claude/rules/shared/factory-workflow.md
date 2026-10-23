@@ -29,8 +29,11 @@ ignore this file.
 2. `gh pr create --fill` — the body says what changed, why, how it was
    verified, and lists any new migration or env variable.
 3. Merge your own PR once `pnpm verify` passed on its head and its checks
-   are green. Never push to `main`. If the repo has its own merge rules,
-   follow them.
+   are green, with `safe-merge <pr> <head-sha>` from the worktree. It
+   refuses if main moved, the head changed or a check is not green; then
+   rebase, re-run verify and try again. Never call `gh pr merge` yourself,
+   never `cd` in front of a git or `gh` command, never push to `main`. If
+   the repo has its own merge rules, follow them.
 4. Write `.docs/handoff.md` on the branch if the work is not finished.
 
 Production deploys are not part of a task. They happen from `main` after merge.
