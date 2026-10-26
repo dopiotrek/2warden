@@ -43,17 +43,6 @@
 				]
 			}
 		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "[ -e \"$HOME/.claude/hooks/stop-verify-and-log.py\" ] || python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/shared/stop-verify-and-log.py\"",
-						"asyncRewake": true
-					}
-				]
-			}
-		],
 		"SessionStart": [
 			{
 				"hooks": [
