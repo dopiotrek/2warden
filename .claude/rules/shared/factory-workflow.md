@@ -31,7 +31,8 @@ ignore this file.
 3. Merge your own PR once `pnpm verify` passed on its head and its checks
    are green, with `safe-merge <pr> <head-sha>` from the worktree. It
    refuses if main moved, the head changed or a check is not green; then
-   rebase, re-run verify and try again. Never call `gh pr merge` yourself,
+   rebase, re-run verify and try again. If the PR has no checks, leave it
+   open for Piotrek. Never call `gh pr merge` yourself (a hook blocks it),
    never `cd` in front of a git or `gh` command, never push to `main`. If
    the repo has its own merge rules, follow them.
 4. Write `.docs/handoff.md` on the branch if the work is not finished.

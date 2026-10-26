@@ -8,7 +8,7 @@ paths:
 
 # Drizzle + Supabase (schema & migrations)
 
-Loads when editing schema, migrations, or SQL. Reinforces the `drizzle-migration-guard` and `supabase-rls-reminder` hooks.
+Loads when editing schema, migrations, or SQL. Reinforces the `drizzle-migration-guard` hook.
 
 - New table → add Row Level Security before it ships: `ENABLE ROW LEVEL SECURITY` plus a tenant-scoped policy, e.g. `organization_id = auth.jwt() ->> 'organization_id'`. If the project has its own tenant isolation rule (for example one that says no RLS), follow that rule instead.
 - No destructive schema change without explicit confirmation: never `DROP TABLE` / `DROP SCHEMA` / `TRUNCATE`, never `DELETE` without `WHERE`. Treat `DROP COLUMN`, `ALTER COLUMN TYPE`, and `SET NOT NULL` without a default as risky — flag before applying.
