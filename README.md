@@ -37,11 +37,11 @@ the moment it starts. The agent sees `***`.
 Bitwarden has two products. 2warden uses **Secrets Manager**, not the personal
 password vault, on purpose:
 
-| | Personal vault (`bw` CLI) | Secrets Manager (`bws` CLI) |
-|---|---|---|
-| Unlock | Master password → a session key that opens **everything** | A **machine account** token |
-| Scope | Your whole vault | Only the projects you grant |
-| Touch ID in CLI | No | Not needed |
+|                 | Personal vault (`bw` CLI)                                 | Secrets Manager (`bws` CLI) |
+| --------------- | --------------------------------------------------------- | --------------------------- |
+| Unlock          | Master password → a session key that opens **everything** | A **machine account** token |
+| Scope           | Your whole vault                                          | Only the projects you grant |
+| Touch ID in CLI | No                                                        | Not needed                  |
 
 With Secrets Manager, you give the agent's machine account access to **one
 project** (for example `Agent`). Even if something goes wrong, the token cannot
@@ -253,19 +253,19 @@ or list the variables under `passThroughEnv` for the `dev` task in `turbo.json`.
 
 ## Commands
 
-| Command | What it does | Shows a value? |
-|---|---|---|
-| `find <q…> [--project P] [--json]` | Search keys | No |
-| `projects [--json]` | Projects the token can see | No |
-| `run --env N=bws://… … [--no-mask] -- cmd` | Run `cmd` with secrets as env vars | No* |
-| `env run <tpl> [--no-mask] -- cmd` | Same, from a template | No* |
-| `env check <tpl>` | Check every reference resolves | No |
-| `import <file> --prefix P [--only …] [--dry-run]` | `.env` → Bitwarden + template | No |
-| `create KEY (--clipboard\|--stdin)` | Save one secret, read back, print ref | No |
-| `read <ref> [--clipboard]` | Print or copy one value | **Yes** |
-| `token set [--clipboard\|--stdin]` / `status` / `clear` | Manage the access token | No |
-| `config set project\|server <v>` / `config show` | Defaults | No |
-| `doctor` | Check the setup | No |
+| Command                                                 | What it does                          | Shows a value? |
+| ------------------------------------------------------- | ------------------------------------- | -------------- |
+| `find <q…> [--project P] [--json]`                      | Search keys                           | No             |
+| `projects [--json]`                                     | Projects the token can see            | No             |
+| `run --env N=bws://… … [--no-mask] -- cmd`              | Run `cmd` with secrets as env vars    | No*            |
+| `env run <tpl> [--no-mask] -- cmd`                      | Same, from a template                 | No*            |
+| `env check <tpl>`                                       | Check every reference resolves        | No             |
+| `import <file> --prefix P [--only …] [--dry-run]`       | `.env` → Bitwarden + template         | No             |
+| `create KEY (--clipboard\|--stdin)`                     | Save one secret, read back, print ref | No             |
+| `read <ref> [--clipboard]`                              | Print or copy one value               | **Yes**        |
+| `token set [--clipboard\|--stdin]` / `status` / `clear` | Manage the access token               | No             |
+| `config set project\|server <v>` / `config show`        | Defaults                              | No             |
+| `doctor`                                                | Check the setup                       | No             |
 
 \* The command you run gets the value. Its output is masked.
 
@@ -304,13 +304,13 @@ Report security problems as described in [SECURITY.md](SECURITY.md).
 
 ## Troubleshooting
 
-| You see | Fix |
-|---|---|
-| `invalid_client` | The server does not know the token. EU account? `2warden config set server https://vault.bitwarden.eu` |
-| `404 Not Found` on `create` or `import` | The machine account has only **Can read**. Set **Can read, write** on the project. |
+| You see                                       | Fix                                                                                                                     |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `invalid_client`                              | The server does not know the token. EU account? `2warden config set server https://vault.bitwarden.eu`                  |
+| `404 Not Found` on `create` or `import`       | The machine account has only **Can read**. Set **Can read, write** on the project.                                      |
 | `does not look like a Bitwarden access token` | The clipboard held something else, often the command you just pasted. Type `2warden token set` and paste at the prompt. |
-| `bws is not installed` | See step 2 of Setup. |
-| The app starts, but uses old values | Turbo strict env mode, see *Monorepos with Turborepo*. |
+| `bws is not installed`                        | See step 2 of Setup.                                                                                                    |
+| The app starts, but uses old values           | Turbo strict env mode, see _Monorepos with Turborepo_.                                                                  |
 
 ---
 

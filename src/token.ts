@@ -42,7 +42,7 @@ export async function requireToken(): Promise<string> {
 	if (!t) {
 		throw new UserError(
 			'No access token. Create a machine account in Bitwarden Secrets Manager, copy its access token, then run:\n' +
-				'  2warden token set'
+				'  2warden token set',
 		);
 	}
 	return t.token;
@@ -57,13 +57,13 @@ export async function writeToken(token: string): Promise<TokenSource> {
 		if (!t.startsWith('0.')) hints.push('does not start with "0."');
 		throw new UserError(
 			`That does not look like a Bitwarden access token (${hints.join(', ')}).\n` +
-				'Copy the whole token from Bitwarden (it starts with "0."), then run 2warden token set again.'
+				'Copy the whole token from Bitwarden (it starts with "0."), then run 2warden token set again.',
 		);
 	}
 	if (useKeychain()) {
 		// `security -i` reads the command from stdin, so the token never appears in argv.
 		const r = await exec('security', ['-i'], {
-			input: `add-generic-password -U -s ${SERVICE} -a ${ACCOUNT} -l "2warden access token" -w "${t}"\n`
+			input: `add-generic-password -U -s ${SERVICE} -a ${ACCOUNT} -l "2warden access token" -w "${t}"\n`,
 		});
 		if (r.code !== 0) throw new UserError('Could not save the token to the Keychain.');
 		return 'keychain';

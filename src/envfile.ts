@@ -49,7 +49,10 @@ export function parseEnvFlag(s: string): { name: string; ref: string } {
 	const ref = s.slice(eq + 1);
 	if (eq <= 0 || !NAME_RE.test(name)) throw new UserError(`--env expects NAME=bws://<id>.`, 2);
 	if (!isRef(ref)) {
-		throw new UserError(`--env ${name}: the value must be a bws:// reference. Never put a secret value on the command line.`, 2);
+		throw new UserError(
+			`--env ${name}: the value must be a bws:// reference. Never put a secret value on the command line.`,
+			2,
+		);
 	}
 	return { name, ref };
 }

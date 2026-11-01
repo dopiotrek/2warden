@@ -22,7 +22,7 @@ export interface Project {
 export class Bws {
 	constructor(
 		private readonly token: string,
-		private readonly server?: string
+		private readonly server?: string,
 	) {}
 
 	private bin(): string {
@@ -41,7 +41,7 @@ export class Bws {
 			if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
 				throw new UserError(
 					'The Bitwarden Secrets Manager CLI (bws) is not installed.\n' +
-						'  Download it from https://github.com/bitwarden/sdk-sm/releases (there is no Homebrew formula).'
+						'  Download it from https://github.com/bitwarden/sdk-sm/releases (there is no Homebrew formula).',
 				);
 			}
 			throw e;
@@ -57,9 +57,11 @@ export class Bws {
 				.trim();
 			let hint = '';
 			if (msg.includes('invalid_client')) {
-				hint = '\nHint: the server does not know this token. EU account? Run: 2warden config set server https://vault.bitwarden.eu';
+				hint =
+					'\nHint: the server does not know this token. EU account? Run: 2warden config set server https://vault.bitwarden.eu';
 			} else if (msg.includes('404') && args[1] === 'create') {
-				hint = '\nHint: the machine account probably has only "Can read" on this project. In Secrets Manager, open the machine account, Projects tab, and set "Can read, write".';
+				hint =
+					'\nHint: the machine account probably has only "Can read" on this project. In Secrets Manager, open the machine account, Projects tab, and set "Can read, write".';
 			}
 			throw new UserError(`${what} failed: ${msg || `exit code ${r.code}`}${hint}`);
 		}
