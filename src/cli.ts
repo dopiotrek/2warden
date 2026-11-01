@@ -119,7 +119,7 @@ async function cmdFind(argv: string[]): Promise<void> {
 		.map((s) => ({
 			key: s.key,
 			ref: toRef(s.id),
-			project: (s.projectId && pname.get(s.projectId)) ?? null
+			project: (s.projectId && pname.get(s.projectId)) ?? null,
 		}))
 		.sort((x, y) => x.key.localeCompare(y.key));
 
@@ -138,7 +138,14 @@ async function cmdFind(argv: string[]): Promise<void> {
 async function cmdProjects(argv: string[]): Promise<void> {
 	const a = parseArgs(argv, [], ['json']);
 	const projects = await (await client()).listProjects();
-	if (has(a, 'json')) console.log(JSON.stringify(projects.map(({ id, name }) => ({ id, name })), null, 2));
+	if (has(a, 'json'))
+		console.log(
+			JSON.stringify(
+				projects.map(({ id, name }) => ({ id, name })),
+				null,
+				2,
+			),
+		);
 	else for (const p of projects) console.log(`${p.name}  ${p.id}`);
 }
 
@@ -163,7 +170,8 @@ async function runWith(entries: { name: string; ref?: string; value?: string }[]
 
 async function cmdRun(argv: string[]): Promise<number> {
 	const a = parseArgs(argv, ['env'], ['no-mask']);
-	if (a.pos.length) throw new UserError(`Put the command after --, e.g. 2warden run --env ... -- ${a.pos.join(' ')}`, 2);
+	if (a.pos.length)
+		throw new UserError(`Put the command after --, e.g. 2warden run --env ... -- ${a.pos.join(' ')}`, 2);
 	const entries = (a.flags.get('env') ?? []).map(parseEnvFlag);
 	if (entries.length === 0) throw new UserError('Give at least one --env NAME=bws://<id>.', 2);
 	return runWith(entries, a.rest, !has(a, 'no-mask'));
@@ -191,7 +199,12 @@ async function cmdEnv(argv: string[]): Promise<number> {
 		const a = parseArgs(restArgv);
 		const entries = await loadTemplate(a.pos[0]);
 		const refs = entries.filter((e) => e.ref);
-		const resolved = refs.length ? await resolveRefs(await client(), refs.map((e) => e.ref!)) : new Map();
+		const resolved = refs.length
+			? await resolveRefs(
+					await client(),
+					refs.map((e) => e.ref!),
+				)
+			: new Map();
 		for (const e of entries) {
 			if (e.ref) console.log(`ok     ${e.name} -> ${resolved.get(parseRef(e.ref))!.key}`);
 			else console.log(`plain  ${e.name}`);
@@ -235,7 +248,7 @@ async function cmdCreate(argv: string[]): Promise<void> {
 		if (existing.length) {
 			throw new UserError(
 				`"${key}" already exists in ${project.name}: ${existing.map((s) => toRef(s.id)).join(', ')}\n` +
-					'Use that reference, or pass --allow-duplicate.'
+					'Use that reference, or pass --allow-duplicate.',
 			);
 		}
 	}
@@ -253,7 +266,8 @@ async function cmdCreate(argv: string[]): Promise<void> {
 async function cmdImport(argv: string[]): Promise<number> {
 	const a = parseArgs(argv, ['project', 'prefix', 'only', 'out'], ['dry-run', 'force']);
 	const file = a.pos[0];
-	if (!file || a.pos.length !== 1) throw new UserError('Usage: 2warden import <envfile> --prefix APP_ [--only A,B] [--dry-run]', 2);
+	if (!file || a.pos.length !== 1)
+		throw new UserError('Usage: 2warden import <envfile> --prefix APP_ [--only A,B] [--dry-run]', 2);
 	const prefix = one(a, 'prefix');
 	if (prefix === undefined) {
 		throw new UserError('Give --prefix, e.g. --prefix DRONELIST_. It keeps keys from different apps apart.', 2);
@@ -272,7 +286,7 @@ async function cmdImport(argv: string[]): Promise<number> {
 	const dryRun = has(a, 'dry-run');
 
 	const rows = await importEnv(bws, { file, project, prefix, only, out, dryRun, force: has(a, 'force') }, (l) =>
-		console.error(l)
+		console.error(l),
 	);
 
 	const label: Record<string, string> = {
@@ -280,7 +294,7 @@ async function cmdImport(argv: string[]): Promise<number> {
 		exists: 'exists, same value',
 		'exists-differs': 'EXISTS, VALUE DIFFERS (kept as is)',
 		created: 'created',
-		failed: 'FAILED'
+		failed: 'FAILED',
 	};
 	const w = Math.max(...rows.map((r) => r.key.length));
 	console.log(`${dryRun ? 'Dry run. ' : ''}Project: ${project.name}`);
@@ -310,7 +324,8 @@ async function cmdToken(argv: string[]): Promise<void> {
 	if (sub === 'status') {
 		const t = await readToken();
 		console.log(t ? `Token found (${t.source}).` : 'No token.');
-		if (t?.source === 'env') console.log('Warning: BWS_ACCESS_TOKEN is set in the environment. Anything the agent runs can read it.');
+		if (t?.source === 'env')
+			console.log('Warning: BWS_ACCESS_TOKEN is set in the environment. Anything the agent runs can read it.');
 		return;
 	}
 	if (sub === 'clear') {
@@ -426,5 +441,5 @@ main(process.argv.slice(2)).then(
 			process.stderr.write(`2warden: unexpected error: ${(e as Error)?.message ?? String(e)}\n`);
 			process.exitCode = 1;
 		}
-	}
+	},
 );

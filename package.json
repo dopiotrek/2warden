@@ -40,12 +40,18 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check:fast": "pnpm format:check && pnpm check && pnpm lint --max-warnings 0",
     "test": "pnpm build && node --test test/*.test.mjs",
-    "verify": "pnpm check && pnpm test",
+    "verify": "pnpm check:fast && pnpm test",
     "prepack": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
-    "typescript": "^5.7.0"
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "typescript": "^7.0.2"
   }
 }

@@ -20,7 +20,7 @@ export function runChild(cmd: string[], inject: Record<string, string>, maskValu
 	const mask = maskValues !== null && maskValues.length > 0;
 	const child = spawn(cmd[0]!, cmd.slice(1), {
 		env,
-		stdio: ['inherit', mask ? 'pipe' : 'inherit', mask ? 'pipe' : 'inherit']
+		stdio: ['inherit', mask ? 'pipe' : 'inherit', mask ? 'pipe' : 'inherit'],
 	});
 
 	if (mask) {

@@ -15,7 +15,10 @@ export function isRef(s: string): boolean {
 
 export function parseRef(s: string): string {
 	const m = REF_RE.exec(s.trim());
-	if (!m) throw new UserError(`Not a 2warden reference: "${s}". Expected bws://<secret-id>. Use \`2warden find\` to get one.`);
+	if (!m)
+		throw new UserError(
+			`Not a 2warden reference: "${s}". Expected bws://<secret-id>. Use \`2warden find\` to get one.`,
+		);
 	return m[1]!.toLowerCase();
 }
 
@@ -45,7 +48,9 @@ export async function resolveRefs(bws: Bws, refs: string[]): Promise<Map<string,
 		else missing.push(toRef(id));
 	}
 	if (missing.length) {
-		throw new UserError(`These references do not exist, or this access token cannot see them:\n  ${missing.join('\n  ')}`);
+		throw new UserError(
+			`These references do not exist, or this access token cannot see them:\n  ${missing.join('\n  ')}`,
+		);
 	}
 	return out;
 }

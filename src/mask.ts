@@ -50,6 +50,6 @@ export function createMasker(values: readonly string[]): Transform {
 		},
 		flush(cb: TransformCallback) {
 			cb(null, process(pending + decoder.end(), true));
-		}
+		},
 	});
 }

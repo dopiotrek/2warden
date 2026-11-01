@@ -6,7 +6,7 @@ import { join } from 'node:path';
 export class UserError extends Error {
 	constructor(
 		message: string,
-		readonly exitCode = 1
+		readonly exitCode = 1,
 	) {
 		super(message);
 	}
@@ -22,12 +22,12 @@ export interface ExecResult {
 export function exec(
 	cmd: string,
 	args: string[],
-	opts: { env?: NodeJS.ProcessEnv; input?: string } = {}
+	opts: { env?: NodeJS.ProcessEnv; input?: string } = {},
 ): Promise<ExecResult> {
 	return new Promise((resolve, reject) => {
 		const child = spawn(cmd, args, {
 			env: opts.env ?? process.env,
-			stdio: ['pipe', 'pipe', 'pipe']
+			stdio: ['pipe', 'pipe', 'pipe'],
 		});
 		let stdout = '';
 		let stderr = '';

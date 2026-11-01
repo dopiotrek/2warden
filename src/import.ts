@@ -58,7 +58,7 @@ export async function importEnv(bws: Bws, o: ImportOptions, log: (s: string) => 
 	if (!o.dryRun && !o.force) {
 		const exists = await access(o.out).then(
 			() => true,
-			() => false
+			() => false,
 		);
 		if (exists) throw new UserError(`${o.out} already exists. Pass --force to replace it, or --out <file>.`);
 	}

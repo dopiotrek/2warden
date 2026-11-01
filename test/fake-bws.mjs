@@ -30,7 +30,8 @@ const out = (x) => console.log(JSON.stringify(x));
 
 const [group, verb, ...rest] = pos;
 if (group === 'project' && verb === 'list') out(db.projects);
-else if (group === 'secret' && verb === 'list') out(rest[0] ? db.secrets.filter((s) => s.projectId === rest[0]) : db.secrets);
+else if (group === 'secret' && verb === 'list')
+	out(rest[0] ? db.secrets.filter((s) => s.projectId === rest[0]) : db.secrets);
 else if (group === 'secret' && verb === 'get') {
 	const s = db.secrets.find((x) => x.id === rest[0]);
 	if (!s) {

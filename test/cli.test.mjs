@@ -31,10 +31,24 @@ beforeEach(() => {
 		JSON.stringify({
 			projects: [PROJECT],
 			secrets: [
-				{ id: OPENAI_ID, key: 'OPENAI_API_KEY', value: OPENAI_VAL, note: 'note mentions stripe', projectId: PROJECT.id, organizationId: 'org' },
-				{ id: STRIPE_ID, key: 'STRIPE_SECRET_KEY', value: STRIPE_VAL, note: '', projectId: PROJECT.id, organizationId: 'org' }
-			]
-		})
+				{
+					id: OPENAI_ID,
+					key: 'OPENAI_API_KEY',
+					value: OPENAI_VAL,
+					note: 'note mentions stripe',
+					projectId: PROJECT.id,
+					organizationId: 'org',
+				},
+				{
+					id: STRIPE_ID,
+					key: 'STRIPE_SECRET_KEY',
+					value: STRIPE_VAL,
+					note: '',
+					projectId: PROJECT.id,
+					organizationId: 'org',
+				},
+			],
+		}),
 	);
 	cli(['token', 'set', '--stdin'], { input: 'good-token\n' });
 });
@@ -50,8 +64,8 @@ function cli(args, { input, env = {} } = {}) {
 			TWOWARDEN_NO_KEYCHAIN: '1',
 			FAKE_BWS_DB: db,
 			FAKE_BWS_ARGLOG: arglog,
-			...env
-		}
+			...env,
+		},
 	});
 	return { code: r.status, out: r.stdout, err: r.stderr, all: r.stdout + r.stderr };
 }
@@ -90,9 +104,10 @@ test('find --json has key, ref, project only', () => {
 
 test('run injects the value, masks output, and strips the token', () => {
 	writeFileSync(join(home, 'b.txt'), '');
-	const script = 'console.log("v=" + process.env.K); console.error("e=" + process.env.K); console.log("t=" + (process.env.BWS_ACCESS_TOKEN ?? "none")); console.log("len=" + process.env.K.length)';
+	const script =
+		'console.log("v=" + process.env.K); console.error("e=" + process.env.K); console.log("t=" + (process.env.BWS_ACCESS_TOKEN ?? "none")); console.log("len=" + process.env.K.length)';
 	const r = cli(['run', '--env', `K=bws://${OPENAI_ID}`, '--', process.execPath, '-e', script], {
-		env: { BWS_ACCESS_TOKEN: 'good-token' }
+		env: { BWS_ACCESS_TOKEN: 'good-token' },
 	});
 	assert.equal(r.code, 0, r.err);
 	assert.match(r.out, /v=\*\*\*/);
@@ -103,7 +118,16 @@ test('run injects the value, masks output, and strips the token', () => {
 });
 
 test('run --no-mask passes output through as is', () => {
-	const r = cli(['run', '--no-mask', '--env', `K=bws://${OPENAI_ID}`, '--', process.execPath, '-e', 'console.log(process.env.K)']);
+	const r = cli([
+		'run',
+		'--no-mask',
+		'--env',
+		`K=bws://${OPENAI_ID}`,
+		'--',
+		process.execPath,
+		'-e',
+		'console.log(process.env.K)',
+	]);
 	assert.equal(r.out.trim(), OPENAI_VAL);
 });
 
@@ -119,7 +143,15 @@ test('run passes the exit code through', () => {
 });
 
 test('run with an unknown reference fails before starting the command', () => {
-	const r = cli(['run', '--env', 'K=bws://33333333-3333-4333-8333-333333333333', '--', process.execPath, '-e', 'console.log("started")']);
+	const r = cli([
+		'run',
+		'--env',
+		'K=bws://33333333-3333-4333-8333-333333333333',
+		'--',
+		process.execPath,
+		'-e',
+		'console.log("started")',
+	]);
 	assert.notEqual(r.code, 0);
 	assert.doesNotMatch(r.out, /started/);
 	noSecrets(r.all);
@@ -129,13 +161,27 @@ test('env run resolves several refs with one list call and keeps plain values', 
 	const tpl = join(home, '.env.tpl');
 	writeFileSync(
 		tpl,
-		[`# comment`, `export OPENAI_API_KEY=bws://${OPENAI_ID}`, `STRIPE_SECRET_KEY="bws://${STRIPE_ID}"`, `NODE_ENV=development # inline`, ''].join('\n')
+		[
+			`# comment`,
+			`export OPENAI_API_KEY=bws://${OPENAI_ID}`,
+			`STRIPE_SECRET_KEY="bws://${STRIPE_ID}"`,
+			`NODE_ENV=development # inline`,
+			'',
+		].join('\n'),
 	);
-	const script = 'console.log([process.env.OPENAI_API_KEY===' + JSON.stringify(OPENAI_VAL) + ', process.env.STRIPE_SECRET_KEY===' + JSON.stringify(STRIPE_VAL) + ', process.env.NODE_ENV].join(","))';
+	const script =
+		'console.log([process.env.OPENAI_API_KEY===' +
+		JSON.stringify(OPENAI_VAL) +
+		', process.env.STRIPE_SECRET_KEY===' +
+		JSON.stringify(STRIPE_VAL) +
+		', process.env.NODE_ENV].join(","))';
 	const r = cli(['env', 'run', tpl, '--', process.execPath, '-e', script]);
 	assert.equal(r.code, 0, r.err);
 	assert.equal(r.out.trim(), 'true,true,development');
-	const calls = readFileSync(arglog, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+	const calls = readFileSync(arglog, 'utf8')
+		.trim()
+		.split('\n')
+		.map((l) => JSON.parse(l));
 	const secretCalls = calls.filter((c) => c[0] === 'secret');
 	assert.equal(secretCalls.length, 1, 'expected one bws secret call');
 	assert.deepEqual(secretCalls[0].slice(0, 2), ['secret', 'list']);
@@ -176,11 +222,13 @@ test('create uses the default project from config', () => {
 test('create does not leak the value when bws fails, and does not retry', () => {
 	const r = cli(['create', 'FAILS', '--project', 'Agent', '--stdin'], {
 		input: 'value-that-must-not-leak',
-		env: { FAKE_BWS_FAIL_CREATE: '1' }
+		env: { FAKE_BWS_FAIL_CREATE: '1' },
 	});
 	assert.equal(r.code, 1);
 	assert.ok(!r.all.includes('value-that-must-not-leak'), r.all);
-	const creates = readFileSync(arglog, 'utf8').split('\n').filter((l) => l.includes('"create"'));
+	const creates = readFileSync(arglog, 'utf8')
+		.split('\n')
+		.filter((l) => l.includes('"create"'));
 	assert.equal(creates.length, 1);
 });
 
@@ -247,8 +295,8 @@ test('env template parser handles quotes, export and comments', () => {
 			['A', '1'],
 			['B', 'two words'],
 			['C', 'x'],
-			['D', `bws://${OPENAI_ID}`]
-		]
+			['D', `bws://${OPENAI_ID}`],
+		],
 	);
 });
 
@@ -269,7 +317,7 @@ const ENV_TEXT = [
 	'PORT=3000',
 	'EMPTY_SECRET=',
 	'STRIPE_SECRET_KEY=sk_test_import_value_2',
-	''
+	'',
 ].join('\n');
 
 test('import --dry-run lists secret keys only and saves nothing', () => {
@@ -309,7 +357,15 @@ test('import saves values (last line wins), writes a template, and is safe to ru
 	assert.equal(JSON.parse(readFileSync(db, 'utf8')).secrets.length, 4);
 
 	// The template works with env run.
-	const run = cli(['env', 'run', join(dir, '.env.tpl'), '--', process.execPath, '-e', 'console.log(process.env.STRIPE_SECRET_KEY.length)']);
+	const run = cli([
+		'env',
+		'run',
+		join(dir, '.env.tpl'),
+		'--',
+		process.execPath,
+		'-e',
+		'console.log(process.env.STRIPE_SECRET_KEY.length)',
+	]);
 	assert.equal(run.out.trim(), String('sk_test_import_value_2'.length));
 });
 

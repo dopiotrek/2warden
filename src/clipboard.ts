@@ -6,8 +6,8 @@ const READERS: Record<string, [string, string[]][]> = {
 	linux: [
 		['wl-paste', ['-n']],
 		['xclip', ['-selection', 'clipboard', '-o']],
-		['xsel', ['--clipboard', '--output']]
-	]
+		['xsel', ['--clipboard', '--output']],
+	],
 };
 
 const WRITERS: Record<string, [string, string[]][]> = {
@@ -16,8 +16,8 @@ const WRITERS: Record<string, [string, string[]][]> = {
 	linux: [
 		['wl-copy', []],
 		['xclip', ['-selection', 'clipboard']],
-		['xsel', ['--clipboard', '--input']]
-	]
+		['xsel', ['--clipboard', '--input']],
+	],
 };
 
 async function firstWorking(list: [string, string[]][] | undefined, input?: string): Promise<string> {
