@@ -28,14 +28,21 @@ ignore this file.
 1. `git push -u origin HEAD`
 2. `gh pr create --fill` — the body says what changed, why, how it was
    verified, and lists any new migration or env variable.
-3. Merge your own PR once `pnpm verify` passed on its head and its checks
-   are green, with `safe-merge <pr> <head-sha>` from the worktree. It
-   refuses if main moved, the head changed or a check is not green; then
-   rebase, re-run verify and try again. If the PR has no checks, leave it
-   open for Piotrek. Never call `gh pr merge` yourself (a hook blocks it),
-   never `cd` in front of a git or `gh` command, never push to `main`. If
-   the repo has its own merge rules, follow them.
-4. Write `.docs/handoff.md` on the branch if the work is not finished.
+3. Right away, `gh pr merge <pr> --auto --squash`. GitHub merges the PR
+   when the required checks pass. Do not ask Piotrek before you open or
+   merge a PR, and do not ask him to watch CI.
+4. If a check fails, fix it and push; auto-merge stays on. Ask only when
+   you cannot fix it.
+5. If the base branch has no required checks, GitHub would merge at once,
+   so do not use `--auto`. Run `safe-merge --verified <pr> <head-sha>`
+   after `pnpm verify` passed on that head. It refuses if main moved, the
+   head changed or a check that ran is not green; then rebase, re-run
+   verify and try again. To see the required checks:
+   `gh api repos/<owner>/<repo>/branches/main --jq .protection.required_status_checks.contexts`.
+6. Never merge a PR right away with `gh pr merge` and never use `--admin`
+   (a hook blocks both). Never `cd` in front of a git or `gh` command,
+   never push to `main`. If the repo has its own merge rules, follow them.
+7. Write `.docs/handoff.md` on the branch if the work is not finished.
 
 Production deploys are not part of a task. They happen from `main` after merge.
 

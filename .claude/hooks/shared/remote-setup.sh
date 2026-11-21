@@ -18,7 +18,12 @@ if [ -n "$want" ] && [ -n "$have" ] && [ "$have" -lt "$want" ]; then
   echo "Cloud session: Node $have, but the repo wants Node $want. Add Node $want to the cloud environment setup script."
 fi
 
-# 3. Dependencies, once per clone.
+# 3. Git hooks: the shared pre-push hook (factory-sync), unless the repo sets its own (husky does in pnpm install).
+if [ -z "$(git config core.hooksPath)" ] && [ -f .claude/hooks/shared/pre-push ]; then
+  git config core.hooksPath .claude/hooks/shared
+fi
+
+# 4. Dependencies, once per clone.
 [ -d node_modules ] && exit 0
 command -v pnpm >/dev/null 2>&1 || corepack enable >/dev/null 2>&1 || npm i -g pnpm >/dev/null 2>&1
 if pnpm install --frozen-lockfile >/tmp/pnpm-install.log 2>&1; then
