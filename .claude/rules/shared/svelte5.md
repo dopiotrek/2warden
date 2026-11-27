@@ -30,20 +30,21 @@ Loads when working in Svelte files. The runes-only rule also lives in `CLAUDE.md
 These have taken down whole screens. Two shapes:
 
 - An `$effect` that reads and writes the same reactive object. Read each dependency into a local first. Wrap the write in `untrack()`. Guard with `!==` so a no-op write does not fire. Only write calculated fields.
-- An effect that pushes into a `$state` array (for example a registry held in context). `push` reads `length`, so the effect depends on its own write. Wrap the `push` and the cleanup `splice` in `untrack()`. Keep the read that decides *whether* to register tracked.
+- An effect that pushes into a `$state` array (for example a registry held in context). `push` reads `length`, so the effect depends on its own write. Wrap the `push` and the cleanup `splice` in `untrack()`. Keep the read that decides _whether_ to register tracked.
 
 ## Hydration traps
 
 - A component that writes into a context during init (a field registering its label, and anything built like it) must wrap that write in `untrack()`. Otherwise every screen that uses it dies at hydration.
 - A `$bindable("")` prop bound to `undefined` throws `props_invalid_value` and takes the page down. Make the prop optional (`note?: string`) with no fallback. The symptom looks like a stale dev server (no autosave, effects not firing, selects that will not open). Check the console for `props_invalid_value` before you restart anything.
-- State that changes the *number* of rendered rows or cells (page size, visible columns, expanded rows) must not come from `localStorage`. The server cannot read it, so SSR and hydration render different trees and Svelte keeps the mismatch. Use a cookie. `localStorage` is fine for state that only changes an attribute, like a width.
+- State that changes the _number_ of rendered rows or cells (page size, visible columns, expanded rows) must not come from `localStorage`. The server cannot read it, so SSR and hydration render different trees and Svelte keeps the mismatch. Use a cookie. `localStorage` is fine for state that only changes an attribute, like a width.
 
 ## `requestSubmit()` sends the previous value
 
-A hidden `<input value={state}>` read by a programmatic `requestSubmit()` sends the value from *before* the last write. The form is serialised before Svelte flushes, and `tick()` does not help. Put the fields into the request at submit time, read straight from state. Never round-trip form state through the DOM.
+A hidden `<input value={state}>` read by a programmatic `requestSubmit()` sends the value from _before_ the last write. The form is serialised before Svelte flushes, and `tick()` does not help. Put the fields into the request at submit time, read straight from state. Never round-trip form state through the DOM.
 
 ## Components (shadcn-svelte / bits-ui)
 
+- The `shadcn` skill is for React shadcn/ui. In a Svelte repo ignore it: use `pnpm dlx shadcn-svelte@latest` and the shadcn-svelte docs, never `shadcn@latest`.
 - Multi-part components (`Card`, `Dialog`, `Select`, `Tabs` …) are imported as a namespace from their own sub-path: `import * as Dialog from "…/ui/dialog"`. Keep this even where a lint or style rule discourages namespace imports — it matches the upstream docs, and these components each export a bare `Root`.
 - bits-ui `Select`: use `bind:value` or `onValueChange`. `onSelectedChange` is another library's API and does nothing.
 - An icon-only button or link needs an `aria-label`. The accessible name goes on the control, never on the icon.

@@ -2,6 +2,7 @@
 paths:
   - "**/+page.server.ts"
   - "**/*form*.svelte"
+  - "**/*form*.tsx"
   - "**/*form*.ts"
   - "**/forms/**"
 ---
@@ -9,7 +10,7 @@ paths:
 
 # Forms
 
-SvelteKit form actions validated with Zod. Which form library a repo uses (plain `request.formData()` or superforms) is set in the repo's own `forms.md` — follow that, and do not mix the two without a reason.
+Server form actions (SvelteKit actions, or React Router `action` exports) validated with Zod. Which form library a repo uses (plain `request.formData()` or superforms) is set in the repo's own `forms.md` — follow that, and do not mix the two without a reason.
 
 ## Validation
 
@@ -29,8 +30,8 @@ A one-shot post (delete, toggle, a checkbox that saves on change, a row or menu 
 
 ## Client
 
-- `use:enhance` with `reset: false` when the fields mirror server state, so the saved values stay on screen after a save.
-- If the page copies server data into local `$state`, copy it again after the action (see `svelte5.md`).
+- Svelte: `use:enhance` with `reset: false` when the fields mirror server state, so the saved values stay on screen after a save.
+- If the page copies server data into local state (`$state`, or React `useState`), copy it again after the action. Otherwise the screen shows the old value after a save.
 
 ## Breaking the repo's pattern
 
